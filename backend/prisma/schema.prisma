@@ -1,0 +1,116 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Perfil {
+  coordenador
+  almoxarife
+  tecnico
+}
+
+enum EstadoFerramenta {
+  disponivel
+  emprestada
+  manutencao
+  danificada
+}
+
+enum EstadoConservacao {
+  excelente
+  bom
+  regular
+  ruim
+}
+
+enum StatusEmprestimo {
+  ativo
+  devolvido
+  atrasado
+}
+
+enum StatusSolicitacao {
+  pendente
+  aprovada
+  rejeitada
+}
+
+model Usuario {
+  id        String   @id @default(uuid())
+  nome      String
+  username  String   @unique
+  email     String   @unique
+  senha     String
+  perfil    Perfil   @default(tecnico)
+  ativo     Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  emprestimos  Emprestimo[]  @relation("ResponsavelEmprestimo")
+  solicitacoes Solicitacao[] @relation("SolicitanteId")
+  registros    Emprestimo[]  @relation("RegistradoPorId")
+
+  @@map("usuarios")
+}
+
+model Ferramenta {
+  id                String           @id @default(uuid())
+  codigo            String           @unique
+  nome              String
+  categoria         String
+  marca             String?
+  estado            EstadoFerramenta @default(disponivel)
+  estadoConservacao EstadoConservacao @default(bom)
+  quantidade        Int              @default(1)
+  localizacao       String?
+  observacoes       String?
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+
+  emprestimos  Emprestimo[]
+  solicitacoes Solicitacao[]
+
+  @@map("ferramentas")
+}
+
+model Emprestimo {
+  id                    String           @id @default(uuid())
+  ferramentaId          String
+  responsavelId         String
+  registradoPorId       String
+  setor                 String?
+  dataRetirada          DateTime         @default(now())
+  dataDevolucaoPrevista DateTime
+  dataDevolucaoReal     DateTime?
+  status                StatusEmprestimo @default(ativo)
+  observacoes           String?
+  createdAt             DateTime         @default(now())
+  updatedAt             DateTime         @updatedAt
+
+  ferramenta    Ferramenta @relation(fields: [ferramentaId], references: [id])
+  responsavel   Usuario    @relation("ResponsavelEmprestimo", fields: [responsavelId], references: [id])
+  registradoPor Usuario    @relation("RegistradoPorId", fields: [registradoPorId], references: [id])
+
+  @@map("emprestimos")
+}
+
+model Solicitacao {
+  id              String            @id @default(uuid())
+  ferramentaId    String
+  solicitanteId   String
+  previsaoDevolucao DateTime
+  observacoes     String?
+  status          StatusSolicitacao @default(pendente)
+  motivoRejeicao  String?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  ferramenta  Ferramenta @relation(fields: [ferramentaId], references: [id])
+  solicitante Usuario    @relation("SolicitanteId", fields: [solicitanteId], references: [id])
+
+  @@map("solicitacoes")
+}
