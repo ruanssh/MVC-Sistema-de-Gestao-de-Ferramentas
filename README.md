@@ -2,6 +2,8 @@
 
 Sistema web para gerenciamento de ferramentas, empréstimos e solicitações, com controle de acesso por perfil de usuário.
 
+> Projeto acadêmico — Arquitetura MVC desacoplada (NestJS + React)
+
 ---
 
 ## Sumário
