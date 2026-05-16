@@ -1,0 +1,7 @@
+{
+  "name": "sistema-ferramentas",
+  "private": true,
+  "scripts": {
+    "dev:all": "powershell -ExecutionPolicy Bypass -File scripts/dev.ps1"
+  }
+}
