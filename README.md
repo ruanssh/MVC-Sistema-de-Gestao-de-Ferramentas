@@ -160,9 +160,10 @@ Sistema de Ferramentas/
 │
 ├── scripts/
 │   ├── dev.ps1                 # Abre backend + frontend no Windows Terminal
-│   └── dev.bat                 # Atalho para executar o dev.ps1
+│   ├── dev.bat                 # Atalho para executar o dev.ps1
+│   └── install.ps1             # Instala dependências do backend e frontend
 │
-└── package.json                # Scripts raiz (npm run dev:all)
+└── package.json                # Scripts raiz (dev:all, install:all)
 ```
 
 ---
@@ -230,15 +231,19 @@ O login retorna um token JWT que é armazenado no frontend e enviado no header `
 
 ### 1. Clonar e instalar dependências
 
-```bash
-# Backend
-cd Backend
-npm install
+Na raiz do projeto, rode:
 
-# Frontend
-cd ../Frontend
-pnpm install
+```bash
+npm run install:all
 ```
+
+Isso instala automaticamente as dependências do Backend (`npm install`) e do Frontend (`pnpm install`) em sequência, garantindo que todos do time usem as mesmas versões.
+
+> **Instalação manual (alternativa)**
+> ```bash
+> cd Backend && npm install
+> cd ../Frontend && pnpm install
+> ```
 
 ### 2. Configurar variáveis de ambiente
 
@@ -311,6 +316,7 @@ pnpm dev
 ### Raiz
 | Comando | Descrição |
 |---|---|
+| `npm run install:all` | Instala dependências do backend e frontend |
 | `npm run dev:all` | Inicia backend e frontend em terminais separados |
 
 ### Backend (`cd Backend`)

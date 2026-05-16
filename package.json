@@ -2,6 +2,7 @@
   "name": "sistema-ferramentas",
   "private": true,
   "scripts": {
-    "dev:all": "powershell -ExecutionPolicy Bypass -File scripts/dev.ps1"
+    "dev:all": "powershell -ExecutionPolicy Bypass -File scripts/dev.ps1",
+    "install:all": "powershell -ExecutionPolicy Bypass -File scripts/install.ps1"
   }
 }
