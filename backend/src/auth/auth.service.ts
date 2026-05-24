@@ -1,9 +1,8 @@
-import { Injectable, UnauthorizedException, ConflictException } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
 import { PrismaService } from '../prisma/prisma.service';
 import { LoginDto } from './dto/login.dto';
-import { RegisterDto } from './dto/register.dto';
 
 @Injectable()
 export class AuthService {
@@ -27,8 +26,10 @@ export class AuthService {
   }
 
   async login(dto: LoginDto) {
-    const user = await this.prisma.usuario.findUnique({
-      where: { username: dto.username },
+    const user = await this.prisma.usuario.findFirst({
+      where: {
+        email: dto.email,
+      },
       include: { perfil: { select: { id: true, nome: true, slug: true } } },
     });
     if (!user || !user.ativo) throw new UnauthorizedException('Credenciais inválidas');
@@ -42,33 +43,6 @@ export class AuthService {
       access_token: token,
       user: this.toAuthUser(user),
     };
-  }
-
-  async register(dto: RegisterDto) {
-    const exists = await this.prisma.usuario.findFirst({
-      where: { OR: [{ username: dto.username }, { email: dto.email }] },
-    });
-    if (exists) throw new ConflictException('Usuário ou e-mail já cadastrado');
-
-    const perfil = await this.prisma.perfil.findUnique({ where: { slug: dto.perfil } });
-    if (!perfil || !perfil.ativo) {
-      throw new ConflictException('Perfil inválido ou inativo');
-    }
-
-    const hash = await bcrypt.hash(dto.senha, 10);
-    const user = await this.prisma.usuario.create({
-      data: {
-        nome: dto.nome,
-        username: dto.username,
-        email: dto.email,
-        senha: hash,
-        perfilId: perfil.id,
-      },
-      include: { perfil: { select: { id: true, nome: true, slug: true } } },
-    });
-
-    const token = this.jwt.sign({ sub: user.id, username: user.username });
-    return { access_token: token, user: this.toAuthUser(user) };
   }
 
   async me(userId: string) {

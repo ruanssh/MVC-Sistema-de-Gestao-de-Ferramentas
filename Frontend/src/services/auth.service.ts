@@ -19,18 +19,8 @@ export interface AuthResponse {
 }
 
 export const authService = {
-  async login(username: string, senha: string): Promise<AuthResponse> {
-    return api.post<AuthResponse>('/auth/login', { username, senha });
-  },
-
-  async register(data: {
-    nome: string;
-    username: string;
-    email: string;
-    senha: string;
-    perfil: string;
-  }): Promise<AuthResponse> {
-    return api.post<AuthResponse>('/auth/register', data);
+  async login(email: string, senha: string): Promise<AuthResponse> {
+    return api.post<AuthResponse>('/auth/login', { email, senha });
   },
 
   async me(): Promise<Usuario> {

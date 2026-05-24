@@ -5,17 +5,8 @@ interface AuthContextType {
   user: Usuario | null;
   token: string | null;
   loading: boolean;
-  login: (username: string, senha: string) => Promise<void>;
-  register: (data: RegisterData) => Promise<void>;
+  login: (email: string, senha: string) => Promise<void>;
   logout: () => void;
-}
-
-interface RegisterData {
-  nome: string;
-  username: string;
-  email: string;
-  senha: string;
-  perfil: string;
 }
 
 const AuthContext = createContext<AuthContextType>(null!);
@@ -42,16 +33,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const login = async (username: string, senha: string) => {
-    const res = await authService.login(username, senha);
-    localStorage.setItem('token', res.access_token);
-    localStorage.setItem('user', JSON.stringify(res.user));
-    setToken(res.access_token);
-    setUser(res.user);
-  };
-
-  const register = async (data: RegisterData) => {
-    const res = await authService.register(data);
+  const login = async (email: string, senha: string) => {
+    const res = await authService.login(email, senha);
     localStorage.setItem('token', res.access_token);
     localStorage.setItem('user', JSON.stringify(res.user));
     setToken(res.access_token);
@@ -66,7 +49,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, loading, login, register, logout }}>
+    <AuthContext.Provider value={{ user, token, loading, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

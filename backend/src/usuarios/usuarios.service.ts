@@ -1,6 +1,7 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import * as bcrypt from 'bcryptjs';
 import { PrismaService } from '../prisma/prisma.service';
+import { RegisterDto } from '../auth/dto/register.dto';
 
 @Injectable()
 export class UsuariosService {
@@ -43,6 +44,30 @@ export class UsuariosService {
       orderBy: { nome: 'asc' },
     });
     return users.map((u) => this.mapUsuario(u));
+  }
+
+  async create(dto: RegisterDto) {
+    const exists = await this.prisma.usuario.findFirst({
+      where: { OR: [{ username: dto.username }, { email: dto.email }] },
+    });
+    if (exists) throw new ConflictException('Usuário ou e-mail já cadastrado');
+
+    const perfil = await this.prisma.perfil.findUnique({ where: { slug: dto.perfil } });
+    if (!perfil || !perfil.ativo) throw new NotFoundException('Perfil não encontrado ou inativo');
+
+    const hash = await bcrypt.hash(dto.senha, 10);
+    const user = await this.prisma.usuario.create({
+      data: {
+        nome: dto.nome,
+        username: dto.username,
+        email: dto.email,
+        senha: hash,
+        perfilId: perfil.id,
+      },
+      include: { perfil: { select: { id: true, nome: true, slug: true } } },
+    });
+
+    return this.mapUsuario(user);
   }
 
   async updatePerfil(id: string, perfilSlug: string) {

@@ -6,6 +6,7 @@ import { Roles } from '../auth/decorators/roles.decorator';
 
 @Controller('perfis')
 @UseGuards(JwtAuthGuard, RolesGuard)
+@Roles('admin')
 export class PerfisController {
   constructor(private service: PerfisService) {}
 
@@ -15,13 +16,11 @@ export class PerfisController {
   }
 
   @Post()
-  @Roles('coordenador')
   create(@Body() body: { nome: string; slug: string; descricao?: string }) {
     return this.service.create(body);
   }
 
   @Patch(':id')
-  @Roles('coordenador')
   update(@Param('id') id: string, @Body() body: { nome?: string; descricao?: string; ativo?: boolean }) {
     return this.service.update(id, body);
   }

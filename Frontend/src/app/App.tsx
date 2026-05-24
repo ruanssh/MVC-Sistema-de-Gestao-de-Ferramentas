@@ -4,7 +4,6 @@ import { AuthProvider } from '../contexts/AuthContext';
 import PrivateRoute from '../components/layout/PrivateRoute';
 
 import LoginPage from '../pages/auth/LoginPage';
-import RegisterPage from '../pages/auth/RegisterPage';
 import ForgotPasswordPage from '../pages/auth/ForgotPasswordPage';
 import DashboardPage from '../pages/DashboardPage';
 import MinhasSolicitacoesPage from '../pages/tecnico/MinhasSolicitacoesPage';
@@ -24,7 +23,6 @@ export default function App() {
         <Routes>
           {/* Rotas públicas */}
           <Route path="/login" element={<LoginPage />} />
-          <Route path="/registro" element={<RegisterPage />} />
           <Route path="/recuperar-senha" element={<ForgotPasswordPage />} />
 
           {/* Rotas autenticadas */}
@@ -38,7 +36,7 @@ export default function App() {
           <Route path="/emprestimos" element={<PrivateRoute roles={['almoxarife', 'coordenador']}><EmprestimosPage /></PrivateRoute>} />
           <Route path="/solicitacoes" element={<PrivateRoute roles={['coordenador']}><SolicitacoesPage /></PrivateRoute>} />
           <Route path="/relatorios" element={<PrivateRoute roles={['coordenador', 'almoxarife']}><RelatoriosPage /></PrivateRoute>} />
-          <Route path="/usuarios" element={<PrivateRoute roles={['coordenador']}><UsuariosPage /></PrivateRoute>} />
+          <Route path="/usuarios" element={<PrivateRoute roles={['admin']}><UsuariosPage /></PrivateRoute>} />
 
           {/* Redirect */}
           <Route path="/" element={<Navigate to="/dashboard" replace />} />

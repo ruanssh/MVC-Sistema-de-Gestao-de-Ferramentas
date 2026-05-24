@@ -4,12 +4,17 @@ import { Wrench, LogOut, LayoutDashboard, Package, ClipboardList, History, BarCh
 import { useAuth } from '../../contexts/AuthContext';
 
 const perfilLabel = {
+  admin: 'Administrador',
   coordenador: 'Coordenador',
   almoxarife: 'Almoxarife',
   tecnico: 'Técnico',
 };
 
 const navPorPerfil = {
+  admin: [
+    { to: '/dashboard', label: 'Início', icon: LayoutDashboard },
+    { to: '/usuarios',  label: 'Usuários', icon: Users },
+  ],
   tecnico: [
     { to: '/dashboard',            label: 'Início',          icon: LayoutDashboard },
     { to: '/disponibilidade',      label: 'Disponibilidade', icon: Search },

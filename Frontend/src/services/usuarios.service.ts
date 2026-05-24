@@ -6,6 +6,19 @@ export interface UsuarioLista {
   username: string;
   email: string;
   perfil: string;
+  perfilDetalhe?: {
+    id: string;
+    nome: string;
+    slug: string;
+  };
+}
+
+export interface CreateUsuarioData {
+  nome: string;
+  username: string;
+  email: string;
+  senha: string;
+  perfil: string;
 }
 
 export const usuariosService = {
@@ -15,6 +28,14 @@ export const usuariosService = {
 
   findByPerfil(perfil: string): Promise<UsuarioLista[]> {
     return api.get<UsuarioLista[]>(`/usuarios?perfil=${perfil}`);
+  },
+
+  create(data: CreateUsuarioData): Promise<UsuarioLista> {
+    return api.post<UsuarioLista>('/usuarios', data);
+  },
+
+  updatePerfil(id: string, perfil: string): Promise<UsuarioLista> {
+    return api.patch<UsuarioLista>(`/usuarios/${id}/perfil`, { perfil });
   },
 
   resetPassword(id: string, novaSenha: string): Promise<{ message: string }> {
