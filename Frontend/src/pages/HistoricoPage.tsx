@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { emprestimosService, Emprestimo } from '../services/emprestimos.service';
+import { useAuth } from '../contexts/AuthContext';
 import AppLayout from '../components/layout/AppLayout';
 import { toast } from 'sonner';
 
@@ -10,16 +11,19 @@ const statusConfig: Record<string, string> = {
 };
 
 export default function HistoricoPage() {
+  const { user } = useAuth();
   const [emprestimos, setEmprestimos] = useState<Emprestimo[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!user) return;
+    const params = user.perfil === 'tecnico' ? { responsavelId: user.id } : undefined;
     emprestimosService
-      .findAll()
+      .findAll(params)
       .then(setEmprestimos)
       .catch(() => toast.error('Erro ao carregar histórico'))
       .finally(() => setLoading(false));
-  }, []);
+  }, [user]);
 
   return (
     <AppLayout>

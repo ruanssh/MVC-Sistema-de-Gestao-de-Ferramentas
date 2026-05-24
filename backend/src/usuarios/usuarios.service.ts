@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import * as bcrypt from 'bcryptjs';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
@@ -37,5 +38,12 @@ export class UsuariosService {
       data: { ativo: false },
       select: { id: true, nome: true, ativo: true },
     });
+  }
+
+  async resetPassword(id: string, novaSenha: string) {
+    await this.findOne(id);
+    const hash = await bcrypt.hash(novaSenha, 10);
+    await this.prisma.usuario.update({ where: { id }, data: { senha: hash } });
+    return { message: 'Senha redefinida com sucesso' };
   }
 }

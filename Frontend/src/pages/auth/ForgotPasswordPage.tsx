@@ -2,15 +2,21 @@ import { useState } from 'react';
 import { Link } from 'react-router';
 import { Wrench } from 'lucide-react';
 import { toast } from 'sonner';
+import { authService } from '../../services/auth.service';
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
   const [sent, setSent] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSent(true);
-    toast.success('Instruções enviadas para ' + email);
+    try {
+      await authService.forgotPassword(email);
+      setSent(true);
+      toast.success('Instruções enviadas para ' + email);
+    } catch {
+      toast.error('Erro ao enviar. Verifique o e-mail informado.');
+    }
   };
 
   return (

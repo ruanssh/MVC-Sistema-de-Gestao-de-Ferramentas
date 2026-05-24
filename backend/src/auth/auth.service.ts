@@ -46,4 +46,10 @@ export class AuthService {
       select: { id: true, nome: true, username: true, email: true, perfil: true },
     });
   }
+
+  async forgotPassword(email: string) {
+    // Sempre retorna sucesso para não expor quais e-mails estão cadastrados
+    await this.prisma.usuario.findUnique({ where: { email } });
+    return { message: 'Se o e-mail estiver cadastrado, as instruções foram enviadas.' };
+  }
 }

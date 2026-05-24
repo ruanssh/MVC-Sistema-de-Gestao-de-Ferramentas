@@ -3,6 +3,7 @@ import { Plus } from 'lucide-react';
 import { emprestimosService, Emprestimo } from '../services/emprestimos.service';
 import { ferramentasService, Ferramenta } from '../services/ferramentas.service';
 import { usuariosService, UsuarioLista } from '../services/usuarios.service';
+import { useAuth } from '../contexts/AuthContext';
 import AppLayout from '../components/layout/AppLayout';
 import { toast } from 'sonner';
 
@@ -13,6 +14,8 @@ const statusConfig: Record<string, string> = {
 };
 
 export default function EmprestimosPage() {
+  const { user } = useAuth();
+  const canOperate = user?.perfil === 'almoxarife';
   const [emprestimos, setEmprestimos] = useState<Emprestimo[]>([]);
   const [ferramentas, setFerramentas] = useState<Ferramenta[]>([]);
   const [usuarios, setUsuarios] = useState<UsuarioLista[]>([]);
@@ -65,9 +68,11 @@ export default function EmprestimosPage() {
       <div className="max-w-5xl mx-auto space-y-5">
         <div className="flex items-center justify-between">
           <h1 className="text-xl font-bold text-gray-900">Empréstimos</h1>
-          <button onClick={() => setShowForm(true)} className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-blue-700 transition-colors">
-            <Plus className="w-4 h-4" /> Registrar Empréstimo
-          </button>
+          {canOperate && (
+            <button onClick={() => setShowForm(true)} className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-blue-700 transition-colors">
+              <Plus className="w-4 h-4" /> Registrar Empréstimo
+            </button>
+          )}
         </div>
 
         <div className="flex gap-2">
@@ -112,7 +117,7 @@ export default function EmprestimosPage() {
                       </span>
                     </td>
                     <td className="px-4 py-3">
-                      {e.status !== 'devolvido' && (
+                      {canOperate && e.status !== 'devolvido' && (
                         <button onClick={() => handleDevolver(e.id)} className="text-xs bg-green-600 text-white px-3 py-1.5 rounded-lg hover:bg-green-700 transition-colors">
                           Devolver
                         </button>

@@ -1,4 +1,4 @@
-import { Controller, Get, Patch, Param, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Patch, Param, Query, Body, UseGuards } from '@nestjs/common';
 import { UsuariosService } from './usuarios.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
@@ -24,5 +24,11 @@ export class UsuariosController {
   @Roles('coordenador')
   deactivate(@Param('id') id: string) {
     return this.service.deactivate(id);
+  }
+
+  @Patch(':id/reset-password')
+  @Roles('coordenador')
+  resetPassword(@Param('id') id: string, @Body() body: { novaSenha: string }) {
+    return this.service.resetPassword(id, body.novaSenha);
   }
 }

@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
-import { CheckCircle, Clock, Package, Plus } from 'lucide-react';
+import { CheckCircle, Clock, Package, Plus, AlertCircle } from 'lucide-react';
 import { solicitacoesService, Solicitacao } from '../../services/solicitacoes.service';
 import { ferramentasService } from '../../services/ferramentas.service';
+import { emprestimosService } from '../../services/emprestimos.service';
+import { useAuth } from '../../contexts/AuthContext';
 import AppLayout from '../../components/layout/AppLayout';
 import { toast } from 'sonner';
 import { Link } from 'react-router';
@@ -13,22 +15,27 @@ const statusConfig = {
 };
 
 export default function TecnicoDashboard() {
+  const { user } = useAuth();
   const [solicitacoes, setSolicitacoes] = useState<Solicitacao[]>([]);
   const [disponivel, setDisponivel] = useState<number>(0);
+  const [atrasados, setAtrasados] = useState<number>(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!user) return;
     Promise.all([
       solicitacoesService.minhas(),
       ferramentasService.stats(),
+      emprestimosService.findAll({ responsavelId: user.id, status: 'atrasado' }),
     ])
-      .then(([sol, stats]) => {
+      .then(([sol, stats, atr]) => {
         setSolicitacoes(sol);
         setDisponivel(stats.disponivel);
+        setAtrasados(atr.length);
       })
       .catch(() => toast.error('Erro ao carregar dados'))
       .finally(() => setLoading(false));
-  }, []);
+  }, [user]);
 
   const pendentes = solicitacoes.filter((s) => s.status === 'pendente').length;
   const aprovadas = solicitacoes.filter((s) => s.status === 'aprovada').length;
@@ -51,6 +58,15 @@ export default function TecnicoDashboard() {
           </div>
         ) : (
           <>
+            {atrasados > 0 && (
+              <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex items-center gap-3">
+                <AlertCircle className="w-5 h-5 text-red-600 shrink-0" />
+                <p className="text-sm text-red-700">
+                  <strong>Devolução em atraso:</strong> você tem {atrasados} ferramenta(s) com prazo vencido.{' '}
+                  <Link to="/historico" className="underline font-medium">Ver histórico</Link>
+                </p>
+              </div>
+            )}
             <div className="grid grid-cols-3 gap-4">
               <div className="bg-white rounded-xl border border-gray-200 p-5 flex items-center gap-3">
                 <div className="w-9 h-9 bg-green-50 rounded-xl flex items-center justify-center">
@@ -82,7 +98,12 @@ export default function TecnicoDashboard() {
             </div>
 
             <div className="bg-white rounded-xl border border-gray-200 p-5">
-              <h2 className="font-semibold text-gray-800 mb-4">Minhas Solicitações Recentes</h2>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="font-semibold text-gray-800">Minhas Solicitações Recentes</h2>
+                <Link to="/minhas-solicitacoes" className="text-xs text-blue-600 hover:underline">
+                  Ver todas
+                </Link>
+              </div>
               {solicitacoes.length === 0 ? (
                 <p className="text-sm text-gray-400">Nenhuma solicitação feita ainda.</p>
               ) : (

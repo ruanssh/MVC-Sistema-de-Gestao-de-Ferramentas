@@ -31,4 +31,8 @@ export const authService = {
   async me(): Promise<Usuario> {
     return api.get<Usuario>('/auth/me');
   },
+
+  async forgotPassword(email: string): Promise<{ message: string }> {
+    return api.post<{ message: string }>('/auth/forgot-password', { email });
+  },
 };

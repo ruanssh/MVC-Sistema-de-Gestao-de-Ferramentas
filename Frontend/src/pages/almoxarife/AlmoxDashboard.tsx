@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import { CheckCircle, ClipboardList, AlertCircle, Clock, Plus, RotateCcw, Wrench, Bell } from 'lucide-react';
+import { CheckCircle, ClipboardList, AlertCircle, Clock, Plus, Bell } from 'lucide-react';
 import { ferramentasService, FerramentaStats } from '../../services/ferramentas.service';
-import { emprestimosService, Emprestimo } from '../../services/emprestimos.service';
+import { emprestimosService, Emprestimo, EmprestimoStats } from '../../services/emprestimos.service';
 import { solicitacoesService, Solicitacao } from '../../services/solicitacoes.service';
 import AppLayout from '../../components/layout/AppLayout';
 import { toast } from 'sonner';
@@ -21,14 +21,9 @@ function StatCard({ icon: Icon, label, value, color }: any) {
   );
 }
 
-const statusColors: Record<string, string> = {
-  ativo: 'bg-blue-100 text-blue-700',
-  atrasado: 'bg-red-100 text-red-700',
-  devolvido: 'bg-green-100 text-green-700',
-};
-
 export default function AlmoxDashboard() {
   const [fStats, setFStats] = useState<FerramentaStats | null>(null);
+  const [eStats, setEStats] = useState<EmprestimoStats | null>(null);
   const [emprestimos, setEmprestimos] = useState<Emprestimo[]>([]);
   const [pendentes, setPendentes] = useState<Solicitacao[]>([]);
   const [loading, setLoading] = useState(true);
@@ -37,13 +32,15 @@ export default function AlmoxDashboard() {
     setLoading(true);
     Promise.all([
       ferramentasService.stats(),
-      emprestimosService.findAll({ status: 'ativo' }),
+      emprestimosService.findAll(),
       solicitacoesService.findAll({ status: 'pendente' }),
+      emprestimosService.stats(),
     ])
-      .then(([fs, emp, sol]) => {
+      .then(([fs, emp, sol, es]) => {
         setFStats(fs);
         setEmprestimos(emp);
         setPendentes(sol);
+        setEStats(es);
       })
       .catch(() => toast.error('Erro ao carregar dados'))
       .finally(() => setLoading(false));
@@ -83,9 +80,19 @@ export default function AlmoxDashboard() {
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
               <StatCard icon={CheckCircle} label="Disponíveis" value={fStats?.disponivel} color="bg-green-50 text-green-600" />
               <StatCard icon={ClipboardList} label="Emprestadas" value={fStats?.emprestada} color="bg-blue-50 text-blue-600" />
-              <StatCard icon={AlertCircle} label="Atrasadas" value={fStats?.danificada} color="bg-red-50 text-red-600" />
+              <StatCard icon={AlertCircle} label="Atrasadas" value={eStats?.atrasados} color="bg-red-50 text-red-600" />
               <StatCard icon={Clock} label="Manutenção" value={fStats?.manutencao} color="bg-amber-50 text-amber-600" />
             </div>
+
+            {(eStats?.atrasados ?? 0) > 0 && (
+              <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex items-center gap-3">
+                <AlertCircle className="w-5 h-5 text-red-600 shrink-0" />
+                <p className="text-sm text-red-700">
+                  <strong>Devoluções atrasadas:</strong> {eStats?.atrasados} ferramenta(s) com devolução em atraso.{' '}
+                  <Link to="/emprestimos" className="underline font-medium">Ver empréstimos</Link>
+                </p>
+              </div>
+            )}
 
             {pendentes.length > 0 && (
               <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-center gap-3">
@@ -98,12 +105,12 @@ export default function AlmoxDashboard() {
             )}
 
             <div className="bg-white rounded-xl border border-gray-200 p-5">
-              <h2 className="font-semibold text-gray-800 mb-4">Empréstimos Ativos</h2>
-              {emprestimos.length === 0 ? (
-                <p className="text-sm text-gray-400">Nenhum empréstimo ativo no momento</p>
+              <h2 className="font-semibold text-gray-800 mb-4">Empréstimos em Aberto</h2>
+              {emprestimos.filter(e => e.status !== 'devolvido').length === 0 ? (
+                <p className="text-sm text-gray-400">Nenhum empréstimo em aberto no momento</p>
               ) : (
                 <ul className="space-y-3">
-                  {emprestimos.map((e) => (
+                  {emprestimos.filter(e => e.status !== 'devolvido').map((e) => (
                     <li key={e.id} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-0">
                       <div>
                         <p className="text-sm font-medium text-gray-800">{e.ferramenta.nome}</p>

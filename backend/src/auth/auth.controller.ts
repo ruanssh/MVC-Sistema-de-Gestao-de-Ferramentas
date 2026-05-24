@@ -19,6 +19,11 @@ export class AuthController {
     return this.authService.register(dto);
   }
 
+  @Post('forgot-password')
+  forgotPassword(@Body() body: { email: string }) {
+    return this.authService.forgotPassword(body.email);
+  }
+
   @Get('me')
   @UseGuards(JwtAuthGuard)
   me(@CurrentUser() user: any) {

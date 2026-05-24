@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Package, ClipboardList, AlertCircle, TrendingUp, BarChart3, FileText } from 'lucide-react';
 import { ferramentasService, FerramentaStats } from '../../services/ferramentas.service';
-import { emprestimosService, EmprestimoStats, Emprestimo } from '../../services/emprestimos.service';
+import { emprestimosService, EmprestimoStats } from '../../services/emprestimos.service';
+import { Link } from 'react-router';
 import AppLayout from '../../components/layout/AppLayout';
 import { toast } from 'sonner';
 
@@ -48,10 +49,10 @@ export default function CoordDashboard() {
       <div className="max-w-5xl mx-auto space-y-6">
         <div className="flex items-center justify-between">
           <h1 className="text-xl font-bold text-gray-900">Dashboard — Coordenador</h1>
-          <a href="/relatorios" className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-blue-700 transition-colors">
+          <Link to="/relatorios" className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-blue-700 transition-colors">
             <FileText className="w-4 h-4" />
             Relatórios Gerenciais
-          </a>
+          </Link>
         </div>
 
         {loading ? (

@@ -7,12 +7,14 @@ import LoginPage from '../pages/auth/LoginPage';
 import RegisterPage from '../pages/auth/RegisterPage';
 import ForgotPasswordPage from '../pages/auth/ForgotPasswordPage';
 import DashboardPage from '../pages/DashboardPage';
+import MinhasSolicitacoesPage from '../pages/tecnico/MinhasSolicitacoesPage';
 import CatalogoPage from '../pages/CatalogoPage';
 import EmprestimosPage from '../pages/EmprestimosPage';
 import SolicitacoesPage from '../pages/SolicitacoesPage';
 import DisponibilidadePage from '../pages/DisponibilidadePage';
 import HistoricoPage from '../pages/HistoricoPage';
 import RelatoriosPage from '../pages/RelatoriosPage';
+import UsuariosPage from '../pages/coordenador/UsuariosPage';
 
 export default function App() {
   return (
@@ -27,14 +29,16 @@ export default function App() {
 
           {/* Rotas autenticadas */}
           <Route path="/dashboard" element={<PrivateRoute><DashboardPage /></PrivateRoute>} />
+          <Route path="/minhas-solicitacoes" element={<PrivateRoute roles={['tecnico']}><MinhasSolicitacoesPage /></PrivateRoute>} />
           <Route path="/catalogo" element={<PrivateRoute><CatalogoPage /></PrivateRoute>} />
           <Route path="/disponibilidade" element={<PrivateRoute><DisponibilidadePage /></PrivateRoute>} />
           <Route path="/historico" element={<PrivateRoute><HistoricoPage /></PrivateRoute>} />
 
           {/* Rotas de almoxarife/coordenador */}
           <Route path="/emprestimos" element={<PrivateRoute roles={['almoxarife', 'coordenador']}><EmprestimosPage /></PrivateRoute>} />
-          <Route path="/solicitacoes" element={<PrivateRoute roles={['almoxarife', 'coordenador']}><SolicitacoesPage /></PrivateRoute>} />
+          <Route path="/solicitacoes" element={<PrivateRoute roles={['coordenador']}><SolicitacoesPage /></PrivateRoute>} />
           <Route path="/relatorios" element={<PrivateRoute roles={['coordenador', 'almoxarife']}><RelatoriosPage /></PrivateRoute>} />
+          <Route path="/usuarios" element={<PrivateRoute roles={['coordenador']}><UsuariosPage /></PrivateRoute>} />
 
           {/* Redirect */}
           <Route path="/" element={<Navigate to="/dashboard" replace />} />

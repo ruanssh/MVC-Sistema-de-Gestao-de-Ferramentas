@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Search, Plus, Pencil, Trash2, Settings } from 'lucide-react';
+import { Search, Plus, Pencil, Trash2 } from 'lucide-react';
 import { ferramentasService, Ferramenta } from '../services/ferramentas.service';
 import AppLayout from '../components/layout/AppLayout';
 import { toast } from 'sonner';
@@ -19,7 +19,7 @@ const emptyForm = {
 
 export default function CatalogoPage() {
   const { user } = useAuth();
-  const canEdit = user?.perfil !== 'tecnico';
+  const canEdit = user?.perfil === 'almoxarife';
   const [ferramentas, setFerramentas] = useState<Ferramenta[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
