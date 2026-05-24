@@ -16,9 +16,9 @@ if ($LASTEXITCODE -ne 0) {
 Write-Host "Backend OK" -ForegroundColor Green
 
 Write-Host ""
-Write-Host "[2/2] Frontend (pnpm)..." -ForegroundColor Yellow
+Write-Host "[2/2] Frontend (npm)..." -ForegroundColor Yellow
 Set-Location "$root\Frontend"
-pnpm install
+npm install
 if ($LASTEXITCODE -ne 0) {
     Write-Host "ERRO: Falha ao instalar dependencias do Frontend." -ForegroundColor Red
     exit 1
