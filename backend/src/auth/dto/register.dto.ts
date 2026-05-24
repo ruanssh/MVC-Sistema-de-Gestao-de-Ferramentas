@@ -1,5 +1,4 @@
-import { IsEmail, IsEnum, IsString, MinLength } from 'class-validator';
-import { Perfil } from '@prisma/client';
+import { IsEmail, IsString, MinLength } from 'class-validator';
 
 export class RegisterDto {
   @IsString()
@@ -15,6 +14,6 @@ export class RegisterDto {
   @MinLength(6)
   senha: string;
 
-  @IsEnum(Perfil)
-  perfil: Perfil;
+  @IsString()
+  perfil: string;
 }

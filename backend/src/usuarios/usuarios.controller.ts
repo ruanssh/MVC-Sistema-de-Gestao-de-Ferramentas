@@ -31,4 +31,10 @@ export class UsuariosController {
   resetPassword(@Param('id') id: string, @Body() body: { novaSenha: string }) {
     return this.service.resetPassword(id, body.novaSenha);
   }
+
+  @Patch(':id/perfil')
+  @Roles('coordenador')
+  updatePerfil(@Param('id') id: string, @Body() body: { perfil: string }) {
+    return this.service.updatePerfil(id, body.perfil);
+  }
 }

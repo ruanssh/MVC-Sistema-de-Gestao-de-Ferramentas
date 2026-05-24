@@ -6,29 +6,56 @@ import { PrismaService } from '../prisma/prisma.service';
 export class UsuariosService {
   constructor(private prisma: PrismaService) {}
 
+  private mapUsuario(u: any) {
+    return {
+      id: u.id,
+      nome: u.nome,
+      username: u.username,
+      email: u.email,
+      perfil: u.perfil.slug,
+      perfilDetalhe: u.perfil,
+      createdAt: u.createdAt,
+    };
+  }
+
   async findAll() {
-    return this.prisma.usuario.findMany({
+    const users = await this.prisma.usuario.findMany({
       where: { ativo: true },
-      select: { id: true, nome: true, username: true, email: true, perfil: true, createdAt: true },
+      include: { perfil: { select: { id: true, nome: true, slug: true } } },
       orderBy: { nome: 'asc' },
     });
+    return users.map((u) => this.mapUsuario(u));
   }
 
   async findOne(id: string) {
     const u = await this.prisma.usuario.findUnique({
       where: { id },
-      select: { id: true, nome: true, username: true, email: true, perfil: true },
+      include: { perfil: { select: { id: true, nome: true, slug: true } } },
     });
     if (!u) throw new NotFoundException('Usuário não encontrado');
-    return u;
+    return this.mapUsuario(u);
   }
 
   async findByPerfil(perfil: string) {
-    return this.prisma.usuario.findMany({
-      where: { perfil: perfil as any, ativo: true },
-      select: { id: true, nome: true, username: true, email: true, perfil: true },
+    const users = await this.prisma.usuario.findMany({
+      where: { perfil: { slug: perfil }, ativo: true },
+      include: { perfil: { select: { id: true, nome: true, slug: true } } },
       orderBy: { nome: 'asc' },
     });
+    return users.map((u) => this.mapUsuario(u));
+  }
+
+  async updatePerfil(id: string, perfilSlug: string) {
+    await this.findOne(id);
+    const perfil = await this.prisma.perfil.findUnique({ where: { slug: perfilSlug } });
+    if (!perfil || !perfil.ativo) throw new NotFoundException('Perfil não encontrado ou inativo');
+
+    const updated = await this.prisma.usuario.update({
+      where: { id },
+      data: { perfilId: perfil.id },
+      include: { perfil: { select: { id: true, nome: true, slug: true } } },
+    });
+    return this.mapUsuario(updated);
   }
 
   async deactivate(id: string) {

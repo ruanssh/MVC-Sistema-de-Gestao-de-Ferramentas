@@ -5,7 +5,12 @@ export interface Usuario {
   nome: string;
   username: string;
   email: string;
-  perfil: 'coordenador' | 'almoxarife' | 'tecnico';
+  perfil: string;
+  perfilDetalhe?: {
+    id: string;
+    nome: string;
+    slug: string;
+  };
 }
 
 export interface AuthResponse {

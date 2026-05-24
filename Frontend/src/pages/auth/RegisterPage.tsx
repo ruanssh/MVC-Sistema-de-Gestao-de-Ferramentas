@@ -1,21 +1,33 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router';
 import { Wrench } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '../../contexts/AuthContext';
+import { perfisService, Perfil } from '../../services/perfis.service';
 
 export default function RegisterPage() {
   const { register } = useAuth();
   const navigate = useNavigate();
+  const [perfis, setPerfis] = useState<Perfil[]>([]);
   const [form, setForm] = useState({
     nome: '',
     username: '',
     email: '',
     senha: '',
     confirmarSenha: '',
-    perfil: 'tecnico',
+    perfil: '',
   });
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    perfisService
+      .findAll()
+      .then((lista) => {
+        setPerfis(lista);
+        setForm((prev) => ({ ...prev, perfil: prev.perfil || lista[0]?.slug || '' }));
+      })
+      .catch(() => toast.error('Erro ao carregar perfis'));
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -74,11 +86,12 @@ export default function RegisterPage() {
             <select
               value={form.perfil}
               onChange={set('perfil')}
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="tecnico">Técnico/Colaborador</option>
-              <option value="almoxarife">Almoxarife</option>
-              <option value="coordenador">Coordenador</option>
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                disabled={perfis.length === 0}
+              >
+              {perfis.map((perfil) => (
+                <option key={perfil.id} value={perfil.slug}>{perfil.nome}</option>
+              ))}
             </select>
           </div>
 
