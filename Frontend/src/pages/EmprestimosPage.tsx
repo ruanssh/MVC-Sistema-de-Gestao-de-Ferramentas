@@ -15,7 +15,7 @@ const statusConfig: Record<string, string> = {
 
 export default function EmprestimosPage() {
   const { user } = useAuth();
-  const canOperate = user?.perfil === 'almoxarife';
+  const canOperate = user?.perfil === 'tecnico' || user?.perfil === 'almoxarife';
   const [emprestimos, setEmprestimos] = useState<Emprestimo[]>([]);
   const [ferramentas, setFerramentas] = useState<Ferramenta[]>([]);
   const [usuarios, setUsuarios] = useState<UsuarioLista[]>([]);

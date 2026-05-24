@@ -3,7 +3,7 @@ import { api } from './api';
 export interface UsuarioLista {
   id: string;
   nome: string;
-  username: string;
+  username?: string;
   email: string;
   perfil: string;
   perfilDetalhe?: {
@@ -15,7 +15,6 @@ export interface UsuarioLista {
 
 export interface CreateUsuarioData {
   nome: string;
-  username: string;
   email: string;
   senha: string;
   perfil: string;

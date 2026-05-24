@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { ForbiddenException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
 import { PrismaService } from '../prisma/prisma.service';
@@ -57,5 +57,23 @@ export class AuthService {
     // Sempre retorna sucesso para não expor quais e-mails estão cadastrados
     await this.prisma.usuario.findUnique({ where: { email } });
     return { message: 'Se o e-mail estiver cadastrado, as instruções foram enviadas.' };
+  }
+
+  async impersonate(adminId: string, targetUserId: string) {
+    const admin = await this.prisma.usuario.findUnique({
+      where: { id: adminId },
+      include: { perfil: { select: { slug: true } } },
+    });
+    if (!admin || !admin.ativo) throw new UnauthorizedException('Administrador inválido');
+    if (admin.perfil.slug !== 'admin') throw new ForbiddenException('Apenas administrador pode personificar');
+
+    const targetUser = await this.prisma.usuario.findUnique({
+      where: { id: targetUserId },
+      include: { perfil: { select: { id: true, nome: true, slug: true } } },
+    });
+    if (!targetUser || !targetUser.ativo) throw new NotFoundException('Usuário alvo não encontrado ou inativo');
+
+    const token = this.jwt.sign({ sub: targetUser.id, username: targetUser.username });
+    return { access_token: token, user: this.toAuthUser(targetUser) };
   }
 }

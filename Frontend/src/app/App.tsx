@@ -28,14 +28,14 @@ export default function App() {
           {/* Rotas autenticadas */}
           <Route path="/dashboard" element={<PrivateRoute><DashboardPage /></PrivateRoute>} />
           <Route path="/minhas-solicitacoes" element={<PrivateRoute roles={['tecnico']}><MinhasSolicitacoesPage /></PrivateRoute>} />
-          <Route path="/catalogo" element={<PrivateRoute><CatalogoPage /></PrivateRoute>} />
-          <Route path="/disponibilidade" element={<PrivateRoute><DisponibilidadePage /></PrivateRoute>} />
-          <Route path="/historico" element={<PrivateRoute><HistoricoPage /></PrivateRoute>} />
+          <Route path="/catalogo" element={<PrivateRoute roles={['almoxarife']}><CatalogoPage /></PrivateRoute>} />
+          <Route path="/disponibilidade" element={<PrivateRoute roles={['tecnico', 'coordenador']}><DisponibilidadePage /></PrivateRoute>} />
+          <Route path="/historico" element={<PrivateRoute roles={['coordenador']}><HistoricoPage /></PrivateRoute>} />
 
           {/* Rotas de almoxarife/coordenador */}
-          <Route path="/emprestimos" element={<PrivateRoute roles={['almoxarife', 'coordenador']}><EmprestimosPage /></PrivateRoute>} />
-          <Route path="/solicitacoes" element={<PrivateRoute roles={['coordenador']}><SolicitacoesPage /></PrivateRoute>} />
-          <Route path="/relatorios" element={<PrivateRoute roles={['coordenador', 'almoxarife']}><RelatoriosPage /></PrivateRoute>} />
+          <Route path="/emprestimos" element={<PrivateRoute roles={['tecnico', 'almoxarife']}><EmprestimosPage /></PrivateRoute>} />
+          <Route path="/solicitacoes" element={<PrivateRoute roles={['almoxarife', 'coordenador']}><SolicitacoesPage /></PrivateRoute>} />
+          <Route path="/relatorios" element={<PrivateRoute roles={['coordenador']}><RelatoriosPage /></PrivateRoute>} />
           <Route path="/usuarios" element={<PrivateRoute roles={['admin']}><UsuariosPage /></PrivateRoute>} />
 
           {/* Redirect */}

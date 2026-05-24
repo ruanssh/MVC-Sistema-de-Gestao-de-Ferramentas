@@ -30,4 +30,8 @@ export const authService = {
   async forgotPassword(email: string): Promise<{ message: string }> {
     return api.post<{ message: string }>('/auth/forgot-password', { email });
   },
+
+  async impersonate(id: string): Promise<AuthResponse> {
+    return api.post<AuthResponse>(`/auth/impersonate/${id}`, {});
+  },
 };

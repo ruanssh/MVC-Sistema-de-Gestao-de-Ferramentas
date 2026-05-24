@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
-import { KeyRound, UserPlus, Users, UserX } from 'lucide-react';
+import { KeyRound, LogIn, UserPlus, Users, UserX } from 'lucide-react';
 import { toast } from 'sonner';
 import AppLayout from '../../components/layout/AppLayout';
 import { perfisService, Perfil } from '../../services/perfis.service';
 import { usuariosService, UsuarioLista } from '../../services/usuarios.service';
+import { useAuth } from '../../contexts/AuthContext';
+import { useNavigate } from 'react-router';
 
 const perfilColor: Record<string, string> = {
   admin: 'bg-gray-900 text-white',
@@ -14,13 +16,14 @@ const perfilColor: Record<string, string> = {
 
 const initialForm = {
   nome: '',
-  username: '',
   email: '',
   senha: '',
   perfil: '',
 };
 
 export default function UsuariosPage() {
+  const { user, impersonate } = useAuth();
+  const navigate = useNavigate();
   const [usuarios, setUsuarios] = useState<UsuarioLista[]>([]);
   const [perfis, setPerfis] = useState<Perfil[]>([]);
   const [form, setForm] = useState(initialForm);
@@ -101,6 +104,16 @@ export default function UsuariosPage() {
     }
   };
 
+  const handleImpersonate = async (u: UsuarioLista) => {
+    try {
+      await impersonate(u.id);
+      toast.success(`Agora voce esta como ${u.nome}`);
+      navigate('/dashboard');
+    } catch (err: any) {
+      toast.error(err.message || 'Erro ao personificar usuario');
+    }
+  };
+
   return (
     <AppLayout>
       <div className="max-w-6xl mx-auto space-y-5">
@@ -109,14 +122,10 @@ export default function UsuariosPage() {
           <h1 className="text-xl font-bold text-gray-900">Usuários</h1>
         </div>
 
-        <form onSubmit={handleCreate} className="bg-white rounded-xl border border-gray-200 p-4 grid grid-cols-1 md:grid-cols-6 gap-3 items-end">
+        <form onSubmit={handleCreate} className="bg-white rounded-xl border border-gray-200 p-4 grid grid-cols-1 md:grid-cols-5 gap-3 items-end">
           <div className="md:col-span-2">
             <label className="block text-xs font-medium text-gray-500 mb-1">Nome</label>
             <input value={form.nome} onChange={set('nome')} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" required />
-          </div>
-          <div>
-            <label className="block text-xs font-medium text-gray-500 mb-1">Usuário</label>
-            <input value={form.username} onChange={set('username')} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" required />
           </div>
           <div>
             <label className="block text-xs font-medium text-gray-500 mb-1">E-mail</label>
@@ -124,7 +133,7 @@ export default function UsuariosPage() {
           </div>
           <div>
             <label className="block text-xs font-medium text-gray-500 mb-1">Senha inicial</label>
-            <input type="password" minLength={6} value={form.senha} onChange={set('senha')} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" required />
+            <input type="password" value={form.senha} onChange={set('senha')} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" required />
           </div>
           <div>
             <label className="block text-xs font-medium text-gray-500 mb-1">Perfil</label>
@@ -132,7 +141,7 @@ export default function UsuariosPage() {
               {perfis.map((perfil) => <option key={perfil.id} value={perfil.slug}>{perfil.nome}</option>)}
             </select>
           </div>
-          <button type="submit" disabled={creating || perfis.length === 0} className="md:col-span-6 flex items-center justify-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-60">
+          <button type="submit" disabled={creating || perfis.length === 0} className="md:col-span-5 flex items-center justify-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-60">
             <UserPlus className="w-4 h-4" /> {creating ? 'Cadastrando...' : 'Cadastrar usuário'}
           </button>
         </form>
@@ -147,7 +156,6 @@ export default function UsuariosPage() {
               <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
                   <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Nome</th>
-                  <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Usuário</th>
                   <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">E-mail</th>
                   <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Perfil</th>
                   <th className="px-4 py-3" />
@@ -155,11 +163,10 @@ export default function UsuariosPage() {
               </thead>
               <tbody>
                 {usuarios.length === 0 ? (
-                  <tr><td colSpan={5} className="text-center py-8 text-gray-400">Nenhum usuário encontrado</td></tr>
+                  <tr><td colSpan={4} className="text-center py-8 text-gray-400">Nenhum usuário encontrado</td></tr>
                 ) : usuarios.map((u) => (
                   <tr key={u.id} className="border-b border-gray-100 hover:bg-gray-50">
                     <td className="px-4 py-3 font-medium text-gray-800">{u.nome}</td>
-                    <td className="px-4 py-3 text-gray-500 font-mono text-xs">{u.username}</td>
                     <td className="px-4 py-3 text-gray-500 text-xs">{u.email}</td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
@@ -176,6 +183,11 @@ export default function UsuariosPage() {
                         <button onClick={() => { setResetando(u); setNovaSenha(''); }} className="flex items-center gap-1 text-xs bg-amber-100 text-amber-700 px-2.5 py-1.5 rounded-lg hover:bg-amber-200 transition-colors" title="Redefinir senha">
                           <KeyRound className="w-3.5 h-3.5" /> Redefinir senha
                         </button>
+                        {user?.id !== u.id && (
+                          <button onClick={() => handleImpersonate(u)} className="flex items-center gap-1 text-xs bg-indigo-100 text-indigo-700 px-2.5 py-1.5 rounded-lg hover:bg-indigo-200 transition-colors" title="Entrar como usuário">
+                            <LogIn className="w-3.5 h-3.5" /> Entrar como
+                          </button>
+                        )}
                         <button onClick={() => handleDesativar(u)} className="flex items-center gap-1 text-xs bg-red-100 text-red-700 px-2.5 py-1.5 rounded-lg hover:bg-red-200 transition-colors" title="Desativar usuário">
                           <UserX className="w-3.5 h-3.5" /> Desativar
                         </button>
@@ -201,7 +213,7 @@ export default function UsuariosPage() {
               </div>
               <div className="flex gap-3">
                 <button onClick={() => setResetando(null)} className="flex-1 border border-gray-300 text-gray-700 py-2.5 rounded-xl text-sm font-medium hover:bg-gray-50">Cancelar</button>
-                <button onClick={handleReset} disabled={saving || novaSenha.length < 6} className="flex-1 bg-blue-600 text-white py-2.5 rounded-xl text-sm font-medium hover:bg-blue-700 disabled:opacity-60">
+                <button onClick={handleReset} disabled={saving || !novaSenha.trim()} className="flex-1 bg-blue-600 text-white py-2.5 rounded-xl text-sm font-medium hover:bg-blue-700 disabled:opacity-60">
                   {saving ? 'Salvando...' : 'Confirmar'}
                 </button>
               </div>

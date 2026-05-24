@@ -7,6 +7,17 @@ import { RegisterDto } from '../auth/dto/register.dto';
 export class UsuariosService {
   constructor(private prisma: PrismaService) {}
 
+  private async buildUsernameFromEmail(email: string) {
+    const base = email.split('@')[0].toLowerCase().replace(/[^a-z0-9._-]/g, '') || 'user';
+    let username = base;
+    let suffix = 1;
+    while (await this.prisma.usuario.findUnique({ where: { username } })) {
+      username = `${base}${suffix}`;
+      suffix += 1;
+    }
+    return username;
+  }
+
   private mapUsuario(u: any) {
     return {
       id: u.id,
@@ -48,18 +59,19 @@ export class UsuariosService {
 
   async create(dto: RegisterDto) {
     const exists = await this.prisma.usuario.findFirst({
-      where: { OR: [{ username: dto.username }, { email: dto.email }] },
+      where: { email: dto.email },
     });
-    if (exists) throw new ConflictException('Usuário ou e-mail já cadastrado');
+    if (exists) throw new ConflictException('E-mail já cadastrado');
 
     const perfil = await this.prisma.perfil.findUnique({ where: { slug: dto.perfil } });
     if (!perfil || !perfil.ativo) throw new NotFoundException('Perfil não encontrado ou inativo');
 
+    const username = await this.buildUsernameFromEmail(dto.email);
     const hash = await bcrypt.hash(dto.senha, 10);
     const user = await this.prisma.usuario.create({
       data: {
         nome: dto.nome,
-        username: dto.username,
+        username,
         email: dto.email,
         senha: hash,
         perfilId: perfil.id,
